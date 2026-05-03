@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>a.portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4F1EA;
+    --bg-alt: #ECE7DC;
+    --ink: #14110D;
+    --ink-soft: #5A554C;
+    --line: #D8D2C4;
+    --accent: #C8442A;
+    --accent-soft: rgba(200, 68, 42, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Geist', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ---------- Custom Cursor ---------- */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--ink);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, background 0.2s ease, width 0.2s ease, height 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor.hover {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    mix-blend-mode: multiply;
+  }
+
+  /* ---------- Grain Overlay ---------- */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    z-index: 1;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* ---------- Background Dots (data scatter) ---------- */
+  .scatter {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* ---------- Layout ---------- */
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ---------- Nav ---------- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    background: rgba(244, 241, 234, 0.7);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+  nav.scrolled { border-bottom-color: var(--line); }
+
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .nav-links li { display: flex; align-items: center; }
+  .nav-links a {
+    color: var(--ink);
+    text-decoration: none;
+    position: relative;
+    transition: color 0.2s ease;
+    line-height: 1;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -6px; left: 0;
+    width: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-links a:hover::after { width: 100%; }
+
+  .nav-links .nav-resume {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px 9px 16px;
+    border: 1px solid var(--ink);
+    border-radius: 100px;
+    line-height: 1;
+    transition: all 0.3s ease;
+  }
+  .nav-links .nav-resume::after { display: none; }
+  .nav-links .nav-resume svg {
+    transition: transform 0.3s ease;
+    display: block;
+  }
+  .nav-links .nav-resume:hover {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .nav-links .nav-resume:hover svg { transform: translateY(2px); }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    min-height: 100vh;
+    padding: 160px 0 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .hero-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    margin-bottom: 80px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 8px; }
+  .pulse {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .hero-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(64px, 11vw, 168px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+    margin-bottom: 48px;
+  }
+  .hero-title .italic {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-title .word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+  }
+  .hero-title .word > span {
+    display: inline-block;
+    transform: translateY(110%);
+    animation: rise 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes rise {
+    to { transform: translateY(0); }
+  }
+
+  .hero-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: end;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.2s forwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-desc {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 480px;
+    line-height: 1.55;
+  }
+  .hero-desc em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--ink);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+  .hero-stats > div { text-align: right; }
+  .stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "lnum", "tnum";
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  /* ---------- Hero Action Buttons ---------- */
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 56px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.5s forwards;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 28px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--ink);
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateY(101%);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 0;
+  }
+  .btn-primary:hover { border-color: var(--accent); }
+  .btn-primary:hover::before { transform: translateY(0); }
+  .btn-primary .btn-label,
+  .btn-primary .btn-icon { position: relative; z-index: 1; }
+  .btn-primary .btn-icon {
+    display: inline-flex;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-primary:hover .btn-icon { transform: translateY(3px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn-ghost:hover {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .btn-ghost .arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+  .btn-ghost:hover .arrow { transform: translateY(3px); }
+
+  /* ---------- Section base ---------- */
+  section {
+    padding: 120px 0;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--accent);
+  }
+  .section-label.centered {
+    display: inline-flex;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .section-label.centered::after {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--accent);
+  }
+
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(40px, 6vw, 80px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 64px;
+    max-width: 900px;
+  }
+  .section-title .italic {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  /* ---------- About ---------- */
+  .about {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .about-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    line-height: 1.8;
+    padding-top: 8px;
+  }
+  .about-meta dt {
+    color: var(--ink);
+    margin-top: 16px;
+  }
+  .about-meta dt:first-child { margin-top: 0; }
+  .about-meta dd { color: var(--ink-soft); }
+  .about-text {
+    font-size: 21px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .about-text p + p { margin-top: 24px; }
+  .about-text em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  /* ---------- Projects ---------- */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-top: 1px solid var(--line);
+    margin: 0 -24px;
+  }
+  .project {
+    display: grid;
+    grid-template-columns: 80px 1.5fr 2fr 1fr 60px;
+    gap: 32px;
+    align-items: center;
+    padding: 36px 24px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    transition: color 0.4s ease;
+    overflow: hidden;
+  }
+  .project::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: -1;
+  }
+  .project:hover { color: var(--bg); }
+  .project:hover::before { transform: translateY(0); }
+  .project:hover .project-num,
+  .project:hover .project-meta,
+  .project:hover .project-tags span { color: var(--bg-alt); }
+  .project:hover .project-tags span { border-color: var(--bg-alt); }
+  .project:hover .project-arrow { color: var(--accent); transform: translate(8px, -8px) rotate(0); }
+
+  .project-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    transition: color 0.4s ease;
+  }
+  .project-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .project-title em { font-style: italic; }
+  .project-meta {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    transition: color 0.4s ease;
+  }
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .project-tags span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    color: var(--ink-soft);
+    transition: all 0.4s ease;
+  }
+  .project-arrow {
+    font-size: 28px;
+    transition: transform 0.4s ease, color 0.4s ease;
+    transform: translate(0, 0) rotate(-45deg);
+    text-align: right;
+    line-height: 1;
+    justify-self: end;
+  }
+
+  /* ---------- Tools / Skills marquee ---------- */
+  .tools {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 80px 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .tools-track {
+    display: flex;
+    gap: 80px;
+    white-space: nowrap;
+    animation: scroll 40s linear infinite;
+    font-family: 'Instrument Serif', serif;
+    font-size: 80px;
+    letter-spacing: -0.03em;
+  }
+  .tools-track span { display: inline-flex; align-items: center; gap: 80px; }
+  .tools-track .dot {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .tools-track em { font-style: italic; color: var(--accent); }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ---------- Contact ---------- */
+  .contact {
+    text-align: center;
+    padding: 160px 0;
+  }
+  .contact-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(56px, 9vw, 140px);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 48px;
+  }
+  .contact-title em { font-style: italic; color: var(--accent); }
+
+  .contact-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 32px;
+    border: 1px solid var(--ink);
+    border-radius: 100px;
+    text-decoration: none;
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .contact-cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: -1;
+  }
+  .contact-cta:hover { color: var(--bg); }
+  .contact-cta:hover::before { transform: translateX(0); }
+  .contact-cta .arrow { transition: transform 0.3s ease; }
+  .contact-cta:hover .arrow { transform: translate(4px, -4px); }
+
+  /* ---------- Footer ---------- */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 32px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* ---------- Reveal Animation ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px) {
+    body { cursor: auto; }
+    .cursor { display: none; }
+    .nav-links {
+      display: flex;
+      gap: 0;
+    }
+    .nav-links li:not(:last-child) { display: none; }
+    .nav-links .nav-resume { padding: 7px 12px; font-size: 11px; }
+    .hero-bottom { grid-template-columns: 1fr; gap: 48px; }
+    .hero-stats { justify-content: flex-start; }
+    .hero-actions { margin-top: 40px; }
+    .btn { padding: 14px 22px; font-size: 11px; }
+    .about { grid-template-columns: 1fr; gap: 32px; }
+    .about-meta { display: flex; flex-wrap: wrap; gap: 8px 24px; line-height: 1.4; }
+    .about-meta dt { margin-top: 0; }
+    .about-meta dt::after { content: ':'; margin-left: 2px; }
+    .projects-grid { margin: 0 -16px; }
+    .project {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 28px 16px;
+    }
+    .project-num { font-size: 10px; }
+    .project-title { font-size: 26px; }
+    .project-arrow { display: none; }
+    .tools-track { font-size: 48px; gap: 48px; }
+    .tools-track span { gap: 48px; }
+    footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<canvas class="scatter" id="scatter"></canvas>
+
+<nav id="nav">
+  <div class="logo">a. portfolio</div>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="/Resume.pdf" download class="nav-resume">Resume <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1V8.5M5 8.5L8 5.5M5 8.5L2 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
+  </ul>
+</nav>
+
+<div class="container">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-meta reveal">
+      <span><span class="pulse"></span>Available for collaboration</span>
+      <!-- <span>Data Visualization &amp; Analytics — 2026</span> -->
+    </div>
+
+    <h1 class="hero-title">
+      <span class="word"><span>Data,</span></span><br />
+      <span class="word"><span class="italic">told</span></span>
+      <span class="word"><span class="italic">beautifully.</span></span>
+    </h1>
+
+    <div class="hero-bottom">
+      <p class="hero-desc">
+        A coursework portfolio by <em>Ashish</em> — exploring how raw numbers become narrative through dashboards, models, and visual storytelling.
+      </p>
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num" data-count="2">0</div>
+          <div class="stat-label">Projects</div>
+        </div>
+        <div>
+          <div class="stat-num" data-count="6">0</div>
+          <div class="stat-label">Tools</div>
+        </div>
+        <div>
+          <div class="stat-num" data-count="2026">0</div>
+          <div class="stat-label">Year</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <a href="/Resume.pdf" download class="btn btn-primary">
+        <span class="btn-label">Download Resume</span>
+        <span class="btn-icon">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1V11M7 11L11 7M7 11L3 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </a>
+      <a href="#work" class="btn btn-ghost">
+        View selected work
+        <span class="arrow">↓</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-label reveal">01 — About</div>
+    <h2 class="section-title reveal">
+      Turning <span class="italic">messy spreadsheets</span> into clear, considered insight.
+    </h2>
+    <div class="about reveal">
+      <dl class="about-meta">
+        <dt>Year</dt>
+        <dd>2024 — 2028</dd>
+        <dt>Course</dt>
+        <dd>Data Viz &amp; Analytics</dd>
+        <dt>Status</dt>
+        <dd>Open to internships</dd>
+      </dl>
+      <div class="about-text">
+        <p>
+          I'm a student of <em>Data Visualization &amp; Analytics</em>, currently learning how to interrogate data, model it, and present it in ways people actually want to read.
+        </p>
+        <p>
+          The work below was built across a single semester — Python notebooks, Power BI dashboards, Tableau stories, and the occasional late-night SQL query. Each project starts with a question and ends with a decision someone could act on.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="work">
+    <div class="section-label reveal">02 — Selected Work</div>
+    <h2 class="section-title reveal">Two projects, one <span class="italic">recurring theme</span> — clarity.</h2>
+
+    <div class="projects-grid">
+
+      <a href="https://github.com/the-ashish2005/spotify-data-analyzer" class="project reveal">
+        <div class="project-num">01 / 06</div>
+        <div class="project-title">Spotify Data <em>Analyzer</em></div>
+        <div class="project-meta">A data visualization project that analyzes your Spotify streaming history to uncover listening patterns, top artists, and time-based trends through interactive charts.</div>
+        <div class="project-tags"><span>Python</span><span>Matplotlib</span><span>JSON data processing</span></div>
+        <div class="project-arrow">↗</div>
+      </a>
+
+      <a href="https://github.com/Anugra07/SectionE_g11_FIFA" class="project reveal">
+        <div class="project-num">02 / 06</div>
+        <div class="project-title">FIFA World Cup <em>Analytics</em></div>
+        <div class="project-meta">End-to-end sports analytics pipeline on 84 years of FIFA World Cup data (1930–2014)</div>
+        <div class="project-tags"><span>Python ETL</span><span>Statistical Analysis</span><span>Tableau Dashboard</span></div>
+        <div class="project-arrow">↗</div>
+      </a>
+
+      <!-- <a href="#" class="project reveal">
+        <div class="project-num">03 / 06</div>
+        <div class="project-title">COVID-19 <em>Impact Study</em></div>
+        <div class="project-meta">Tableau story comparing pandemic mortality with mobility data across 30 countries — shortlisted for course showcase.</div>
+        <div class="project-tags"><span>Tableau</span><span>EDA</span></div>
+        <div class="project-arrow">↗</div>
+      </a>
+
+      <a href="#" class="project reveal">
+        <div class="project-num">04 / 06</div>
+        <div class="project-title">Spotify <em>Listening Trends</em></div>
+        <div class="project-meta">Personal data project — three years of streaming history, analysed for genre drift, mood patterns, and seasonal repeats.</div>
+        <div class="project-tags"><span>Python</span><span>Plotly</span><span>API</span></div>
+        <div class="project-arrow">↗</div>
+      </a>
+
+      <a href="#" class="project reveal">
+        <div class="project-num">05 / 06</div>
+        <div class="project-title">Stock Market <em>Forecast Model</em></div>
+        <div class="project-meta">Time-series forecasting (ARIMA + LSTM) on five Indian large-caps, with backtesting and a written investor brief.</div>
+        <div class="project-tags"><span>Python</span><span>TensorFlow</span><span>Stats</span></div>
+        <div class="project-arrow">↗</div>
+      </a>
+
+      <a href="#" class="project reveal">
+        <div class="project-num">06 / 06</div>
+        <div class="project-title">Urban Air <em>Quality Index</em></div>
+        <div class="project-meta">A D3-powered visual essay tracking PM2.5 levels across Indian metros, 2018–2024 — published as an interactive scrollytelling piece.</div>
+        <div class="project-tags"><span>D3.js</span><span>SVG</span><span>HTML</span></div>
+        <div class="project-arrow">↗</div>
+      </a> -->
+
+    </div>
+  </section>
+
+</div>
+
+<!-- TOOLS MARQUEE -->
+<section class="tools" id="tools">
+  <div class="tools-track">
+    <span>
+      Python <span class="dot"></span>
+      <em>Tableau</em> <span class="dot"></span>
+      Power BI <span class="dot"></span>
+      <em>SQL</em> <span class="dot"></span>
+      Pandas <span class="dot"></span>
+      <em>Excel</em> <span class="dot"></span>
+      D3.js <span class="dot"></span>
+      <em>NumPy</em> <span class="dot"></span>
+    </span>
+    <span>
+      Python <span class="dot"></span>
+      <em>Tableau</em> <span class="dot"></span>
+      Power BI <span class="dot"></span>
+      <em>SQL</em> <span class="dot"></span>
+      Pandas <span class="dot"></span>
+      <em>Excel</em> <span class="dot"></span>
+      D3.js <span class="dot"></span>
+      <em>NumPy</em> <span class="dot"></span>
+    </span>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="section-label centered reveal">03 — Get in Touch</div>
+    <h2 class="contact-title reveal">
+      Let's make <em>numbers</em><br />speak.
+    </h2>
+    <a href="mailto:the.ashish.identity@gmail.com" class="contact-cta reveal">
+      hello@me
+      <span class="arrow">↗</span>
+    </a>
+  </section>
+
+  <footer>
+    <span>© 2026 — All rights reserved</span>
+    <span>Designed &amp; built by hand</span>
+  </footer>
+</div>
+
+<script>
+  // ---------- Custom Cursor ----------
+  const cursor = document.getElementById('cursor');
+  if (window.innerWidth > 900) {
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, .project').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+  }
+
+  // ---------- Nav scroll state ----------
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // ---------- Reveal on scroll ----------
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('in'), i * 60);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ---------- Animated counters ----------
+  const counters = document.querySelectorAll('.stat-num');
+  const cio = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const target = +el.dataset.count;
+        const duration = 1600;
+        const start = performance.now();
+        const tick = (now) => {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          el.textContent = Math.floor(target * eased);
+          if (t < 1) requestAnimationFrame(tick);
+          else el.textContent = target;
+        };
+        requestAnimationFrame(tick);
+        cio.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(c => cio.observe(c));
+
+  // ---------- Background scatter dots ----------
+  const canvas = document.getElementById('scatter');
+  const ctx = canvas.getContext('2d');
+  let dots = [];
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    dots = Array.from({ length: 60 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.2 + 0.4,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: (Math.random() - 0.5) * 0.15,
+      o: Math.random() * 0.3 + 0.1
+    }));
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function drawDots() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    dots.forEach(d => {
+      d.x += d.vx; d.y += d.vy;
+      if (d.x < 0 || d.x > canvas.width) d.vx *= -1;
+      if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+      ctx.fillStyle = `rgba(20, 17, 13, ${d.o})`;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    requestAnimationFrame(drawDots);
+  }
+  drawDots();
+
+  // ---------- Stagger hero word reveals ----------
+  document.querySelectorAll('.hero-title .word > span').forEach((s, i) => {
+    s.style.animationDelay = (0.15 + i * 0.12) + 's';
+  });
+</script>
+</body>
+</html>
